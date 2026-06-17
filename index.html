@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AIMS Plaud Memo</title>
+<style>
+  :root {
+    --bg: #FAFAF8;
+    --bg-elevated: #FFFFFF;
+    --ink: #1A1A1A;
+    --ink-soft: #6B6862;
+    --line: #E5E3DE;
+    --accent: #2454A8;
+    --accent-soft: #EAF0FA;
+    --tag-survey: #2454A8;
+    --tag-survey-bg: #EAF0FA;
+    --tag-meeting: #9A5B13;
+    --tag-meeting-bg: #FBF0E2;
+    --tag-internal: #4B7A4E;
+    --tag-internal-bg: #ECF4EC;
+    --tag-voicenote: #7A4B96;
+    --tag-voicenote-bg: #F2ECF6;
+    --tag-dump: #79766F;
+    --tag-dump-bg: #EFEDE8;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: -apple-system, "Inter", "Segoe UI", sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  .mono {
+    font-family: "SF Mono", "Roboto Mono", monospace;
+  }
+
+  /* ============ TOP BAR ============ */
+  .topbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 18px 20px 10px;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+
+  .brand {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+  }
+
+  .brand-mark {
+    font-family: Georgia, "Times New Roman", serif;
+    font-weight: 700;
+    font-size: 17px;
+    letter-spacing: 0.02em;
+  }
+
+  .brand-sub {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-family: "SF Mono", "Roboto Mono", monospace;
+  }
+
+  .refresh-btn {
+    border: 1px solid var(--line);
+    background: var(--bg-elevated);
+    color: var(--ink-soft);
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+  }
+  .refresh-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .refresh-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  /* ============ HERO / HEADING ============ */
+  .page-head {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 28px 20px 16px;
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+  }
+
+  .page-title {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 44px;
+    font-weight: 400;
+    margin: 0;
+    letter-spacing: -0.01em;
+  }
+
+  .proses-link {
+    font-size: 13px;
+    color: var(--accent);
+    text-decoration: none;
+    font-family: inherit;
+    white-space: nowrap;
+  }
+  .proses-link:hover { text-decoration: underline; }
+  .proses-link:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .page-count {
+    color: var(--ink-soft);
+    font-size: 14px;
+    font-family: "SF Mono", "Roboto Mono", monospace;
+  }
+
+  /* ============ FILTER BAR ============ */
+  .filter-bar {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 4px 20px 16px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+
+  .filter-chip {
+    border: 1px solid var(--line);
+    background: var(--bg-elevated);
+    color: var(--ink-soft);
+    font-size: 13px;
+    padding: 7px 14px;
+    border-radius: 20px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: border-color 0.15s, color 0.15s;
+  }
+  .filter-chip:hover { border-color: var(--accent); }
+  .filter-chip:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .filter-chip.active {
+    background: var(--ink);
+    color: var(--bg-elevated);
+    border-color: var(--ink);
+  }
+
+  .search-box {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 20px 8px;
+  }
+
+  .search-box input {
+    width: 100%;
+    border: 1px solid var(--line);
+    background: var(--bg-elevated);
+    border-radius: 10px;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-family: inherit;
+    color: var(--ink);
+  }
+  .search-box input:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+  .search-box input::placeholder { color: var(--ink-soft); }
+
+  /* ============ LIST ============ */
+  .list {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 8px 20px 80px;
+  }
+
+  .item {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    border-bottom: 1px solid var(--line);
+    padding: 18px 0;
+    cursor: pointer;
+    font-family: inherit;
+    color: inherit;
+  }
+  .item:first-child { border-top: 1px solid var(--line); }
+  .item:hover .item-title { color: var(--accent); }
+  .item:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+  .item-top {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 6px;
+  }
+
+  .tag {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 9px;
+    border-radius: 20px;
+    letter-spacing: 0.01em;
+  }
+  .tag-survey { color: var(--tag-survey); background: var(--tag-survey-bg); }
+  .tag-meeting { color: var(--tag-meeting); background: var(--tag-meeting-bg); }
+  .tag-internal { color: var(--tag-internal); background: var(--tag-internal-bg); }
+  .tag-voicenote { color: var(--tag-voicenote); background: var(--tag-voicenote-bg); }
+  .tag-dump { color: var(--tag-dump); background: var(--tag-dump-bg); }
+
+  .item-proyek {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-family: "SF Mono", "Roboto Mono", monospace;
+  }
+
+  .item-title {
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 4px;
+    line-height: 1.3;
+  }
+
+  .item-summary {
+    font-size: 14px;
+    color: var(--ink-soft);
+    margin: 0 0 6px;
+    line-height: 1.5;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .item-meta {
+    font-size: 12px;
+    color: var(--ink-soft);
+    font-family: "SF Mono", "Roboto Mono", monospace;
+  }
+
+  /* ============ EMPTY STATE ============ */
+  .empty {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 60px 20px;
+    text-align: center;
+    color: var(--ink-soft);
+  }
+  .empty-title {
+    font-family: Georgia, serif;
+    font-size: 22px;
+    color: var(--ink);
+    margin-bottom: 8px;
+  }
+
+  /* ============ DETAIL VIEW ============ */
+  .detail {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 20px 20px 80px;
+    display: none;
+  }
+  .detail.open { display: block; }
+  .list-view.hidden { display: none; }
+
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    border: none;
+    background: none;
+    color: var(--ink-soft);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 8px 0 20px;
+    font-family: inherit;
+  }
+  .back-btn:hover { color: var(--accent); }
+  .back-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .detail-title {
+    font-family: Georgia, "Times New Roman", serif;
+    font-size: 30px;
+    font-weight: 400;
+    line-height: 1.25;
+    margin: 0 0 12px;
+  }
+
+  .detail-meta-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+    font-size: 13px;
+    color: var(--ink-soft);
+    font-family: "SF Mono", "Roboto Mono", monospace;
+  }
+
+  .detail-section {
+    margin-bottom: 28px;
+  }
+
+  .detail-section-label {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+
+  .detail-body {
+    font-size: 15px;
+    line-height: 1.7;
+    color: var(--ink);
+    white-space: pre-wrap;
+  }
+
+  .detail-transcript {
+    font-size: 14px;
+    line-height: 1.7;
+    color: var(--ink-soft);
+    white-space: pre-wrap;
+    background: var(--bg-elevated);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px;
+  }
+
+  .audio-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 14px;
+    border: 1px solid var(--line);
+    padding: 8px 14px;
+    border-radius: 20px;
+  }
+  .audio-link:hover { border-color: var(--accent); }
+
+  details.transcript-toggle summary {
+    cursor: pointer;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin-bottom: 10px;
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand">
+    <span class="brand-mark">AIMS</span>
+    <span class="brand-sub">plaud memo</span>
+  </div>
+  <button class="refresh-btn" id="refreshBtn">Muat ulang</button>
+</div>
+
+<!-- ============ LIST VIEW ============ -->
+<div id="listView" class="list-view">
+  <div class="page-head">
+    <h1 class="page-title">Memo</h1>
+    <a class="proses-link" id="prosesLink" href="#" target="_blank" rel="noopener">Proses</a>
+  </div>
+  <div class="page-count mono" id="pageCount" style="max-width:720px;margin:0 auto;padding:0 20px 16px;">memuat...</div>
+
+  <div class="filter-bar" id="filterBar">
+    <button class="filter-chip active" data-filter="Semua">Semua</button>
+    <button class="filter-chip" data-filter="Survey">Survey</button>
+    <button class="filter-chip" data-filter="Meeting">Meeting</button>
+    <button class="filter-chip" data-filter="Internal">Internal</button>
+    <button class="filter-chip" data-filter="Voice Note">Voice Note</button>
+    <button class="filter-chip" data-filter="Dump">Dump</button>
+  </div>
+
+  <div class="search-box">
+    <input type="text" id="searchInput" placeholder="Cari judul atau ringkasan...">
+  </div>
+
+  <div class="list" id="listContainer">
+    <!-- item di-generate via JS -->
+  </div>
+</div>
+
+<!-- ============ DETAIL VIEW ============ -->
+<div id="detailView" class="detail">
+  <button class="back-btn" id="backBtn">&larr; Kembali ke daftar</button>
+
+  <h1 class="detail-title" id="detailTitle">—</h1>
+  <div class="detail-meta-row">
+    <span id="detailTag"></span>
+    <span class="mono" id="detailMeta"></span>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-section-label">Ringkasan</div>
+    <div class="detail-body" id="detailSummary"></div>
+  </div>
+
+  <div class="detail-section">
+    <div class="detail-section-label">Memo Lengkap</div>
+    <div class="detail-body" id="detailMemo"></div>
+  </div>
+
+  <div class="detail-section">
+    <a class="audio-link" id="detailAudioLink" href="#" target="_blank" rel="noopener">Putar rekaman audio &rarr;</a>
+  </div>
+
+  <div class="detail-section">
+    <details class="transcript-toggle">
+      <summary>Lihat transkrip mentah</summary>
+      <div class="detail-transcript" id="detailTranscript"></div>
+    </details>
+  </div>
+</div>
+
+<script>
+  // ============ KONFIGURASI ============
+  // Ganti dengan URL Web App Apps Script kamu (...exec)
+  const API_URL = 'https://script.google.com/macros/s/AKfycbyuNHMw10rJztw8lcyngoXlM_VaRN3jjixkwXK2esr6revm-mwlztR7vl8WC9dD61_oYA/exec';
+
+  // ============ DUMMY DATA (dipakai sementara sebelum API tersambung) ============
+  const DUMMY_DATA = [
+    {
+      ID: '1', Tanggal: '2026-06-16', Waktu: '17:20:16',
+      Proyek: 'Pitamaha5', Kategori: 'Survey',
+      Judul: 'Survey Ukuran Lantai 2 - Kamar Utama',
+      Ringkasan: 'Pengukuran dimensi ruangan lantai 2 untuk keperluan RAB renovasi. Mencakup kamar utama, kamar mandi, dan koridor.',
+      'Memo Lengkap': '- Kamar utama: 4.2m x 5.1m\n- Tinggi plafon: 2.8m\n- Kamar mandi dalam: 2.1m x 1.8m\n- Koridor depan: lebar 1.5m, panjang 6m\n\nAction item:\n- Cek ulang ukuran pintu kamar mandi, kemungkinan perlu disesuaikan untuk kusen baru',
+      Transkrip: 'Oke ini untuk pengukuran lantai dua... kamar utama panjangnya kurang lebih 4 koma 2 meter, lebarnya 5 koma 1 meter... TAG: Pitamaha5, Survey ...lanjut ke kamar mandi dalam...',
+      Durasi: '12:34', 'Link Audio': '#', Status: 'Baru'
+    },
+    {
+      ID: '2', Tanggal: '2026-06-16', Waktu: '15:01:38',
+      Proyek: 'Chandrawijaya', Kategori: 'Meeting',
+      Judul: 'Diskusi Material Granit dengan Ko King2',
+      Ringkasan: 'Pembahasan pemilihan material granit untuk renovasi, termasuk budget dan timeline pengiriman dari supplier Wisma Sehati.',
+      'Memo Lengkap': '- Klien setuju pakai granit motif Nero Marquina\n- Budget disepakati di kisaran 850rb/m2\n- Supplier: Wisma Sehati, sales Willy\n- Estimasi pengiriman 2 minggu setelah DP\n\nAction item:\n- Follow up Willy untuk invoice resmi\n- Konfirmasi jadwal pemasangan ke tukang',
+      Transkrip: 'TAG: Chandrawijaya, Meeting ...jadi tadi Ko King2 sudah setuju untuk pakai granit yang motif Nero Marquina...',
+      Durasi: '28:10', 'Link Audio': '#', Status: 'Baru'
+    },
+    {
+      ID: '3', Tanggal: '2026-06-15', Waktu: '10:42:18',
+      Proyek: '-', Kategori: 'Dump',
+      Judul: 'Catatan Ide Fitur Dashboard',
+      Ringkasan: 'Pemikiran spontan soal fitur tambahan untuk dashboard internal, belum dikaitkan ke proyek tertentu.',
+      'Memo Lengkap': '- Ide: tambah fitur export PDF dari memo\n- Pertimbangkan integrasi dengan Notion kalau formatnya sudah pas\n- Cek apakah perlu notifikasi WhatsApp selain Telegram',
+      Transkrip: 'Hmm ini cuma mikir-mikir aja soal dashboard... kayaknya enak kalau ada export PDF...',
+      Durasi: '2:05', 'Link Audio': '#', Status: 'Baru'
+    }
+  ];
+
+  let allData = [];
+  let currentFilter = 'Semua';
+  let currentSearch = '';
+
+  const KATEGORI_TAG_CLASS = {
+    'Survey': 'tag-survey',
+    'Meeting': 'tag-meeting',
+    'Internal': 'tag-internal',
+    'Voice Note': 'tag-voicenote',
+    'Dump': 'tag-dump'
+  };
+
+  // ============ FETCH DATA ============
+  async function loadData() {
+    document.getElementById('pageCount').textContent = 'memuat...';
+    try {
+      if (API_URL.indexOf('GANTI_DENGAN') !== -1) {
+        // Belum tersambung ke API asli, pakai dummy data
+        allData = DUMMY_DATA;
+      } else {
+        const res = await fetch(API_URL);
+        allData = await res.json();
+      }
+      // Urutkan terbaru dulu berdasarkan Tanggal + Waktu
+      allData.sort((a, b) => {
+        const aKey = formatTanggal(a.Tanggal) + formatWaktu(a.Waktu);
+        const bKey = formatTanggal(b.Tanggal) + formatWaktu(b.Waktu);
+        return bKey.localeCompare(aKey);
+      });
+      renderList();
+    } catch (err) {
+      document.getElementById('listContainer').innerHTML =
+        '<div class="empty"><div class="empty-title">Gagal memuat data</div><div>' + err.toString() + '</div></div>';
+      document.getElementById('pageCount').textContent = 'error';
+    }
+  }
+
+  // ============ RENDER LIST ============
+  function renderList() {
+    const container = document.getElementById('listContainer');
+    let filtered = allData;
+
+    if (currentFilter !== 'Semua') {
+      filtered = filtered.filter(d => d.Kategori === currentFilter);
+    }
+    if (currentSearch.trim() !== '') {
+      const q = currentSearch.toLowerCase();
+      filtered = filtered.filter(d =>
+        (d.Judul || '').toLowerCase().includes(q) ||
+        (d.Ringkasan || '').toLowerCase().includes(q)
+      );
+    }
+
+    document.getElementById('pageCount').textContent = filtered.length + ' memo';
+
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="empty"><div class="empty-title">Belum ada memo</div><div>Coba ubah filter atau kata kunci pencarian.</div></div>';
+      return;
+    }
+
+    container.innerHTML = filtered.map(d => {
+      const tagClass = KATEGORI_TAG_CLASS[d.Kategori] || 'tag-dump';
+      const proyekLabel = d.Proyek && d.Proyek !== '-' ? d.Proyek : null;
+      return `
+        <button class="item" data-id="${d.ID}">
+          <div class="item-top">
+            <span class="tag ${tagClass}">${escapeHtml(d.Kategori || 'Dump')}</span>
+            ${proyekLabel ? `<span class="item-proyek">${escapeHtml(proyekLabel)}</span>` : ''}
+          </div>
+          <div class="item-title">${escapeHtml(d.Judul || 'Tanpa judul')}</div>
+          <div class="item-summary">${escapeHtml(d.Ringkasan || '')}</div>
+          <div class="item-meta">${escapeHtml(formatTanggal(d.Tanggal))} &middot; ${escapeHtml(formatWaktu(d.Waktu))} &middot; ${escapeHtml(d.Durasi || '-')}</div>
+        </button>
+      `;
+    }).join('');
+
+    container.querySelectorAll('.item').forEach(btn => {
+      btn.addEventListener('click', () => openDetail(btn.dataset.id));
+    });
+  }
+
+  // ============ DETAIL VIEW ============
+  function openDetail(id) {
+    const d = allData.find(x => String(x.ID) === String(id));
+    if (!d) return;
+
+    const tagClass = KATEGORI_TAG_CLASS[d.Kategori] || 'tag-dump';
+    document.getElementById('detailTag').innerHTML = `<span class="tag ${tagClass}">${escapeHtml(d.Kategori || 'Dump')}</span>`;
+    document.getElementById('detailTitle').textContent = d.Judul || 'Tanpa judul';
+    const proyekLabel = d.Proyek && d.Proyek !== '-' ? d.Proyek + ' · ' : '';
+    document.getElementById('detailMeta').textContent = proyekLabel + formatTanggal(d.Tanggal) + ' · ' + formatWaktu(d.Waktu) + ' · ' + (d.Durasi || '-');
+    document.getElementById('detailSummary').textContent = d.Ringkasan || '-';
+    document.getElementById('detailMemo').textContent = d['Memo Lengkap'] || '-';
+    document.getElementById('detailTranscript').textContent = d.Transkrip || '-';
+    document.getElementById('detailAudioLink').href = d['Link Audio'] || '#';
+
+    document.getElementById('listView').classList.add('hidden');
+    document.getElementById('detailView').classList.add('open');
+    window.scrollTo(0, 0);
+  }
+
+  function closeDetail() {
+    document.getElementById('detailView').classList.remove('open');
+    document.getElementById('listView').classList.remove('hidden');
+    window.scrollTo(0, 0);
+  }
+
+  // ============ HELPERS ============
+  function escapeHtml(str) {
+    if (str === null || str === undefined) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+  }
+
+  // Google Sheets API mengembalikan kolom tanggal/waktu sebagai ISO datetime string
+  // (misal "2026-06-15T17:00:00.000Z" atau "1899-12-30T13:56:52.000Z" untuk kolom waktu).
+  // Function ini menormalkan jadi teks biasa: "2026-06-15" dan "13:56:52".
+  function formatTanggal(value) {
+    if (!value) return '-';
+    const str = String(value);
+    const match = str.match(/^(\d{4}-\d{2}-\d{2})/);
+    if (match) return match[1];
+    return str;
+  }
+
+  function formatWaktu(value) {
+    if (!value) return '-';
+    const str = String(value);
+    const match = str.match(/T(\d{2}:\d{2}:\d{2})/);
+    if (match) return match[1];
+    return str;
+  }
+
+  // ============ EVENT LISTENERS ============
+  document.getElementById('backBtn').addEventListener('click', closeDetail);
+  document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+  document.getElementById('filterBar').addEventListener('click', (e) => {
+    const btn = e.target.closest('.filter-chip');
+    if (!btn) return;
+    document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    renderList();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    currentSearch = e.target.value;
+    renderList();
+  });
+
+  // ============ INIT ============
+  document.getElementById('prosesLink').href = API_URL + '?action=proses';
+  loadData();
+</script>
+
+</body>
+</html>
