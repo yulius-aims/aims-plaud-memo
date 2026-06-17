@@ -339,6 +339,24 @@
   }
   .audio-link:hover { border-color: var(--accent); }
 
+  .reproses-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: none;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 14px;
+    font-family: inherit;
+    cursor: pointer;
+    margin-left: 8px;
+  }
+  .reproses-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .reproses-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .reproses-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
   details.transcript-toggle summary {
     cursor: pointer;
     font-size: 12px;
@@ -408,6 +426,7 @@
 
   <div class="detail-section">
     <a class="audio-link" id="detailAudioLink" href="#" target="_blank" rel="noopener">Putar rekaman audio &rarr;</a>
+    <button class="reproses-btn" id="reprosesBtn">&#8635; Transkrip ulang</button>
   </div>
 
   <div class="detail-section">
@@ -457,6 +476,7 @@
   let allData = [];
   let currentFilter = 'Semua';
   let currentSearch = '';
+  let currentDetailId = null;
 
   const KATEGORI_TAG_CLASS = {
     'Survey': 'tag-survey',
@@ -540,6 +560,8 @@
     const d = allData.find(x => String(x.ID) === String(id));
     if (!d) return;
 
+    currentDetailId = id;
+
     const tagClass = KATEGORI_TAG_CLASS[d.Kategori] || 'tag-dump';
     document.getElementById('detailTag').innerHTML = `<span class="tag ${tagClass}">${escapeHtml(d.Kategori || 'Dump')}</span>`;
     document.getElementById('detailTitle').textContent = d.Judul || 'Tanpa judul';
@@ -592,6 +614,36 @@
   // ============ EVENT LISTENERS ============
   document.getElementById('backBtn').addEventListener('click', closeDetail);
   document.getElementById('refreshBtn').addEventListener('click', loadData);
+
+  // ============ TOMBOL TRANSKRIP ULANG ============
+  document.getElementById('reprosesBtn').addEventListener('click', async () => {
+    if (!currentDetailId) return;
+    if (!confirm('Transkrip ulang memo ini? Hasil lama akan ditimpa dengan hasil baru.')) return;
+
+    const btn = document.getElementById('reprosesBtn');
+    btn.disabled = true;
+    btn.innerHTML = '&#8635; Memproses... (mohon tunggu)';
+
+    try {
+      const res = await fetch(API_URL + '?action=reproses&id=' + encodeURIComponent(currentDetailId));
+      const result = await res.json();
+
+      if (result.ok) {
+        // Muat ulang data dari server, lalu buka kembali detail memo yang sama
+        const idToReopen = currentDetailId;
+        await loadData();
+        openDetail(idToReopen);
+        alert('Berhasil! Memo sudah diperbarui dengan transkrip baru.');
+      } else {
+        alert('Gagal: ' + result.message);
+      }
+    } catch (err) {
+      alert('Terjadi error: ' + err.toString());
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '&#8635; Transkrip ulang';
+    }
+  });
 
   document.getElementById('filterBar').addEventListener('click', (e) => {
     const btn = e.target.closest('.filter-chip');
