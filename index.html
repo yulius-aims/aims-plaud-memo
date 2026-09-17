@@ -375,7 +375,10 @@
     <span class="brand-mark">AIMS</span>
     <span class="brand-sub">plaud memo</span>
   </div>
-  <button class="refresh-btn" id="refreshBtn">Muat ulang</button>
+  <div style="display:flex;gap:8px;">
+    <button class="refresh-btn" id="keyBtn" title="Masukkan atau ganti kunci akses">Kunci</button>
+    <button class="refresh-btn" id="refreshBtn">Muat ulang</button>
+  </div>
 </div>
 
 <!-- ============ LIST VIEW ============ -->
@@ -442,6 +445,47 @@
   // Ganti dengan URL Web App Apps Script kamu (...exec)
   const API_URL = 'https://script.google.com/macros/s/AKfycbyuNHMw10rJztw8lcyngoXlM_VaRN3jjixkwXK2esr6revm-mwlztR7vl8WC9dD61_oYA/exec';
 
+  // ============ KUNCI AKSES ============
+  // Kunci TIDAK ditulis di repo ini. Diminta sekali, lalu disimpan hanya di browser ini.
+  // Kunci dibuat/diganti di Apps Script lewat buatAtauGantiAccessKey().
+  const KEY_STORAGE = 'aims_plaud_access_key';
+
+  function getAccessKey(forcePrompt) {
+    let key = null;
+    try { key = localStorage.getItem(KEY_STORAGE); } catch (e) {}
+    if (!key || forcePrompt) {
+      const input = prompt('Masukkan kunci akses PlaudBot:');
+      if (!input || !input.trim()) return forcePrompt ? null : key;
+      key = input.trim();
+      try { localStorage.setItem(KEY_STORAGE, key); } catch (e) {}
+    }
+    return key;
+  }
+
+  function clearAccessKey() {
+    try { localStorage.removeItem(KEY_STORAGE); } catch (e) {}
+  }
+
+  function buildApiUrl(params) {
+    const key = getAccessKey(false);
+    if (!key) return null;
+    const qs = new URLSearchParams(params || {});
+    qs.set('key', key);
+    return API_URL + '?' + qs.toString();
+  }
+
+  function isUnauthorized(json) {
+    return json && !Array.isArray(json) && json.error === 'unauthorized';
+  }
+
+  function showLocked(message) {
+    allData = [];
+    document.getElementById('listContainer').innerHTML =
+      '<div class="empty"><div class="empty-title">' + escapeHtml(message) + '</div>' +
+      '<div>Klik tombol "Kunci" di kanan atas untuk memasukkan kunci akses.</div></div>';
+    document.getElementById('pageCount').textContent = 'terkunci';
+  }
+
   // ============ DUMMY DATA (dipakai sementara sebelum API tersambung) ============
   const DUMMY_DATA = [
     {
@@ -494,8 +538,17 @@
         // Belum tersambung ke API asli, pakai dummy data
         allData = DUMMY_DATA;
       } else {
-        const res = await fetch(API_URL);
-        allData = await res.json();
+        const url = buildApiUrl();
+        if (!url) { showLocked('Kunci akses belum dimasukkan'); return; }
+        const res = await fetch(url);
+        const json = await res.json();
+        if (isUnauthorized(json)) {
+          clearAccessKey();
+          showLocked('Kunci akses salah atau sudah diganti');
+          return;
+        }
+        if (!Array.isArray(json)) throw new Error(json.message || 'Respons server tidak dikenali');
+        allData = json;
       }
       // Urutkan terbaru dulu berdasarkan Tanggal + Waktu
       allData.sort((a, b) => {
@@ -619,16 +672,21 @@
   document.getElementById('reprosesBtn').addEventListener('click', async () => {
     if (!currentDetailId) return;
     if (!confirm('Transkrip ulang memo ini? Hasil lama akan ditimpa dengan hasil baru.')) return;
+    const reprosesUrl = buildApiUrl({ action: 'reproses', id: currentDetailId });
+    if (!reprosesUrl) return;
 
     const btn = document.getElementById('reprosesBtn');
     btn.disabled = true;
     btn.innerHTML = '&#8635; Memproses... (mohon tunggu)';
 
     try {
-      const res = await fetch(API_URL + '?action=reproses&id=' + encodeURIComponent(currentDetailId));
+      const res = await fetch(reprosesUrl);
       const result = await res.json();
 
-      if (result.ok) {
+      if (isUnauthorized(result)) {
+        clearAccessKey();
+        alert('Kunci akses salah atau sudah diganti. Klik tombol "Kunci" untuk memasukkan yang baru.');
+      } else if (result.ok) {
         // Muat ulang data dari server, lalu buka kembali detail memo yang sama
         const idToReopen = currentDetailId;
         await loadData();
@@ -660,7 +718,15 @@
   });
 
   // ============ INIT ============
-  document.getElementById('prosesLink').href = API_URL + '?action=proses';
+  document.getElementById('prosesLink').addEventListener('click', (e) => {
+    e.preventDefault();
+    const url = buildApiUrl({ action: 'proses' });
+    if (url) window.open(url, '_blank', 'noopener');
+  });
+
+  document.getElementById('keyBtn').addEventListener('click', () => {
+    if (getAccessKey(true)) loadData();
+  });
   loadData();
 </script>
 
